@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  clerkId   String   @unique
+  name      String?
+  email     String   @unique
+  imageUrl  String?
+  isAdmin Boolean @default(false)
+
+  ads              Ads[]
+  adsViews         AdsViews[]
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum AdsStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  DELETED
+  REJECTED
+}
+
+enum AdsCategory {
+  BUSINESSES
+  SERVICES
+  REQUESTS
+  JOBS
+  COMMUNITY
+  NEWS
+  LOCALDEALS
+  LOOKINGFOR
+  FORSALE
+}
+
+model Ads {
+  id          String   @id @default(uuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String
+
+  category    AdsCategory
+  status      AdsStatus  @default(PENDING)
+
+  imageUrl    String?
+  contactName String?
+  contactNumber String?
+  location  AdLocation[]
+
+  tags        AdsTag[]
+
+  messages    Message[]
+
+  adsViews    AdsViews[]
+
+  hotness Int @default(0)
+  priority Int @default(0)
+  slug String? @unique
+  url String?
+
+  startDate DateTime?
+  endDate DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([category])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AdLocation {
+  id String @id @default(uuid())
+  name String @unique
+  ads Ads[]
+}
+
+model AdsTag {
+  id String @id @default(uuid())
+  name String
+
+  ads Ads[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  adsId      String
+  ads   Ads @relation(fields: [adsId], references: [id], onDelete: Cascade)
+  senderId  String   // clerkId of sender
+  receiverId String  // clerkId of receiver (ad owner)
+  content   String
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+  sender   User @relation("SentMessages", fields: [senderId], references: [clerkId])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [clerkId])
+  @@index([adsId])
+  @@index([receiverId])
+  @@index([senderId])
+}
+
+model AdsViews {
+  id String @id @default(uuid())
+  adsId String
+  ads Ads @relation(fields: [adsId], references: [id], onDelete: Cascade)
+  userId String?
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@index([adsId])
+  @@index([userId])
+  @@index([createdAt])
+}
