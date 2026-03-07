@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Latest Ads",
+  title: "OpenBoard",
   description:
     "Browse fresh classified ads across jobs, services, community, and local deals.",
   alternates: {
@@ -150,7 +150,7 @@ export default async function Home({
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 animate-pulse rounded-full bg-green-500"></div>
                 <h1 className="text-2xl font-bold text-green-400 font-mono">
-                  POSTADS MARKET
+                  OPENBOARD
                 </h1>
                 <span className="font-mono text-xs text-zinc-500">LIVE</span>
               </div>

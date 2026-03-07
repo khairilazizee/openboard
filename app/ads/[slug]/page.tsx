@@ -142,7 +142,7 @@ export default async function AdDetailsPage({
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
                     ad.status === "ACTIVE"
                       ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      : ad.status === "PENDING"
+                      : ad.status === "PRIVATE"
                         ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
                         : "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200"
                   }`}
@@ -154,11 +154,6 @@ export default async function AdDetailsPage({
               <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
                 {ad.title}
               </h1>
-              <AdDetailsActions
-                adId={ad.id}
-                title={ad.title}
-                shareUrl={shareUrl}
-              />
 
               <p className="mt-4 whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
                 {ad.description}
@@ -214,6 +209,11 @@ export default async function AdDetailsPage({
                   </p>
                 </div>
               </div>
+              <AdDetailsActions
+                adId={ad.id}
+                title={ad.title}
+                shareUrl={shareUrl}
+              />
             </div>
           </article>
         </div>

@@ -271,9 +271,7 @@ export async function updateAdAdminSettings(id: string, formData: FormData) {
   const allowedStatuses = [
     "ACTIVE",
     "INACTIVE",
-    "PENDING",
-    "DELETED",
-    "REJECTED",
+    "PRIVATE",
   ] as const;
 
   if (!allowedStatuses.includes(statusInput as (typeof allowedStatuses)[number])) {
@@ -310,9 +308,7 @@ export async function updateAdAdminSettings(id: string, formData: FormData) {
       status: statusInput as
         | "ACTIVE"
         | "INACTIVE"
-        | "PENDING"
-        | "DELETED"
-        | "REJECTED",
+        | "PRIVATE",
       startDate,
       endDate,
     },

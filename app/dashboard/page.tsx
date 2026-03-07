@@ -4,6 +4,17 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ensureUserFromClerkId } from "../lib/user";
 
+function formatCompactNumber(value: number): string {
+  if (value < 1000) return String(value);
+
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  })
+    .format(value)
+    .toLowerCase();
+}
+
 export default async function DashboardPage() {
   const { userId: clerkId } = await auth();
 
@@ -27,6 +38,7 @@ export default async function DashboardPage() {
 
   const totalAds = ads.length;
   const activeAds = ads.filter((ad) => ad.status === "ACTIVE").length;
+  const totalViews = ads.reduce((sum, ad) => sum + ad._count.adsViews, 0);
 
   return (
     <div className="flex min-h-screen flex-col font-sans">
@@ -63,10 +75,10 @@ export default async function DashboardPage() {
             </div>
             <div className="rounded-lg border border-solid border-black/[.08] bg-white p-6 dark:border-white/[.145] dark:bg-[#1a1a1a]">
               <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                Messages
+                Total Views
               </p>
               <p className="mt-2 text-3xl font-semibold text-black dark:text-zinc-50">
-                0
+                {formatCompactNumber(totalViews)}
               </p>
             </div>
           </div>
@@ -123,7 +135,7 @@ export default async function DashboardPage() {
                             className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
                               ad.status === "ACTIVE"
                                 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                : ad.status === "PENDING"
+                                : ad.status === "PRIVATE"
                                   ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
                                   : "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200"
                             }`}

@@ -38,7 +38,7 @@ async function main() {
   }
 
   const categories = ["BUSINESSES", "SERVICES", "REQUESTS"];
-  const statuses = ["ACTIVE", "PENDING", "INACTIVE"];
+  const statuses = ["ACTIVE", "PRIVATE", "INACTIVE"];
 
   const titles = [
     "Summer Sale - 50% Off",
@@ -79,7 +79,7 @@ async function main() {
         slug: generateSlug(title),
         description: descriptions[descIndex],
         category: categories[i % 3] as "BUSINESSES" | "SERVICES" | "REQUESTS",
-        status: statuses[i % 3] as "ACTIVE" | "PENDING" | "INACTIVE",
+        status: statuses[i % 3] as "ACTIVE" | "PRIVATE" | "INACTIVE",
         contactName: users[userIndex].name,
         hotness: Math.floor(Math.random() * 100),
         priority: Math.floor(Math.random() * 4),

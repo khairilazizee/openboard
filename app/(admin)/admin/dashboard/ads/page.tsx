@@ -112,8 +112,7 @@ export default async function AdminAdsPage() {
                           >
                             <option value="ACTIVE">ACTIVE</option>
                             <option value="INACTIVE">INACTIVE</option>
-                            <option value="DELETED">DELETED</option>
-                            <option value="REJECTED">REJECTED</option>
+                            <option value="PRIVATE">PRIVATE</option>
                           </select>
                           <input
                             name="hotness"

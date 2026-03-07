@@ -34,7 +34,10 @@ function toExternalUrl(url: string) {
 function trackAdView(adId: string) {
   const payload = JSON.stringify({ adId });
 
-  if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+  if (
+    typeof navigator !== "undefined" &&
+    typeof navigator.sendBeacon === "function"
+  ) {
     const blob = new Blob([payload], { type: "application/json" });
     navigator.sendBeacon("/api/ads/view", blob);
     return;
@@ -50,12 +53,22 @@ function trackAdView(adId: string) {
   });
 }
 
+function getAdShareUrl(ad: MarketAd) {
+  if (typeof window === "undefined") return "";
+  return `${window.location.origin}/ads/${ad.slug || ad.id}`;
+}
+
 function AdCardBody({ ad }: { ad: MarketAd }) {
   return (
     <>
       {ad.imageUrl && (
         <div className="relative mb-3 -mx-4 -mt-4 h-32 w-auto overflow-hidden">
-          <Image src={ad.imageUrl} alt={ad.title} fill className="object-cover" />
+          <Image
+            src={ad.imageUrl}
+            alt={ad.title}
+            fill
+            className="object-cover"
+          />
         </div>
       )}
       <div className="absolute right-2 top-2 flex items-center gap-1">
@@ -64,7 +77,9 @@ function AdCardBody({ ad }: { ad: MarketAd }) {
         </span>
       </div>
       <div className="mb-2 flex items-start justify-between gap-2">
-        <span className="font-mono text-[10px] text-green-400">{ad.category}</span>
+        <span className="font-mono text-[10px] text-green-400">
+          {ad.category}
+        </span>
       </div>
       <h3 className="mb-2 line-clamp-2 font-mono text-sm font-bold text-zinc-100 group-hover:text-green-400">
         {ad.title}
@@ -101,11 +116,47 @@ function AdCardBody({ ad }: { ad: MarketAd }) {
 
 export function AdsGridWithSidebar({ ads }: { ads: MarketAd[] }) {
   const [activeAdId, setActiveAdId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const activeAd = useMemo(
     () => ads.find((ad) => ad.id === activeAdId) || null,
     [ads, activeAdId],
   );
+
+  async function handleCopyShareUrl() {
+    if (!activeAd) return;
+    const shareUrl = getAdShareUrl(activeAd);
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  async function handleShare() {
+    if (!activeAd) return;
+    const shareUrl = getAdShareUrl(activeAd);
+
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function"
+    ) {
+      try {
+        await navigator.share({
+          title: activeAd.title,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // User canceled; no action needed.
+      }
+    }
+
+    await handleCopyShareUrl();
+  }
 
   return (
     <>
@@ -230,6 +281,22 @@ export function AdsGridWithSidebar({ ads }: { ads: MarketAd[] }) {
                     year: "numeric",
                   })}
                 </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="rounded border border-zinc-700 px-2 py-1 text-zinc-300 hover:border-green-500 hover:text-green-400"
+                >
+                  SHARE
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyShareUrl}
+                  className="rounded border border-zinc-700 px-2 py-1 text-zinc-300 hover:border-green-500 hover:text-green-400"
+                >
+                  {copied ? "COPIED" : "COPY LINK"}
+                </button>
               </div>
             </div>
           </aside>

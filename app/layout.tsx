@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { getBaseUrl } from "./lib/seo";
+import { cn } from "@/lib/utils";
+
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,8 +24,8 @@ const baseUrl = getBaseUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Postads",
-    template: "%s | Postads",
+    default: "OpenBoard",
+    template: "%s | OpenBoard",
   },
   description: "Post your ads to the world and share it with your friends.",
   alternates: {
@@ -31,13 +34,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: baseUrl,
-    title: "Postads",
+    title: "OpenBoard",
     description: "Post your ads to the world and share it with your friends.",
-    siteName: "Postads",
+    siteName: "OpenBoard",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Postads",
+    title: "OpenBoard",
     description: "Post your ads to the world and share it with your friends.",
   },
   robots: {
@@ -53,7 +56,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" className={cn("font-sans", inter.variable)}>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
