@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Show, UserButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
 
 export function Header() {
   return (
@@ -18,11 +19,8 @@ export function Header() {
           >
             Login
           </Link>
-          <Link
-            href="/register"
-            className="text-sm font-medium text-zinc-600 transition-colors hover:text-black dark:text-white dark:hover:text-zinc-50 bg-blue-500 px-3 py-2 rounded-md shadow-2xs shadow-zinc-300"
-          >
-            Register
+          <Link href="/register">
+            <Button variant="default">Register</Button>
           </Link>
         </Show>
         <Show when="signed-in">

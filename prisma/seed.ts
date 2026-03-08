@@ -37,7 +37,19 @@ async function main() {
     users.push(user);
   }
 
-  const categories = ["BUSINESSES", "SERVICES", "REQUESTS"];
+  const categories = [
+    "MARKETPLACE",
+    "SERVICES",
+    "JOBS",
+    "PROPERTY",
+    "VEHICLE",
+    "BUSINESSES",
+    "REQUESTS",
+    "EVENTS",
+    "COMMUNITY",
+    "DEALS",
+    "NEWS",
+  ] as const;
   const statuses = ["ACTIVE", "PRIVATE", "INACTIVE"];
 
   const titles = [
@@ -66,7 +78,7 @@ async function main() {
     "Limited time promotion. Act fast before it's too late!",
   ];
 
-  for (let i = 1; i <= 120; i++) {
+  for (let i = 1; i <= 10; i++) {
     const userIndex = i % 10;
     const titleIndex = (i - 1) % titles.length;
     const descIndex = (i - 1) % descriptions.length;
@@ -78,7 +90,7 @@ async function main() {
         title: title,
         slug: generateSlug(title),
         description: descriptions[descIndex],
-        category: categories[i % 3] as "BUSINESSES" | "SERVICES" | "REQUESTS",
+        category: categories[i % categories.length],
         status: statuses[i % 3] as "ACTIVE" | "PRIVATE" | "INACTIVE",
         contactName: users[userIndex].name,
         hotness: Math.floor(Math.random() * 100),

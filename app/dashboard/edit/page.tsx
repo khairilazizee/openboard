@@ -6,15 +6,17 @@ import Link from "next/link";
 import { ConfirmDeleteButton } from "../../components/ConfirmDeleteButton";
 
 const categories = [
-  { value: "BUSINESSES", label: "Businesses" },
+  { value: "MARKETPLACE", label: "Marketplace" },
   { value: "SERVICES", label: "Services" },
-  { value: "REQUESTS", label: "Requests" },
   { value: "JOBS", label: "Jobs" },
+  { value: "PROPERTY", label: "Property" },
+  { value: "VEHICLE", label: "Vehicle" },
+  { value: "BUSINESSES", label: "Businesses" },
+  { value: "REQUESTS", label: "Requests" },
+  { value: "EVENTS", label: "Events" },
   { value: "COMMUNITY", label: "Community" },
+  { value: "DEALS", label: "Deals" },
   { value: "NEWS", label: "News" },
-  { value: "LOCALDEALS", label: "Local Deals" },
-  { value: "LOOKINGFOR", label: "Looking For" },
-  { value: "FORSALE", label: "For Sale" },
 ];
 
 export default async function EditAdPage({

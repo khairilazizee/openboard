@@ -6,6 +6,20 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ensureUserFromClerkId } from "./user";
 
+const allowedCategories = [
+  "MARKETPLACE",
+  "SERVICES",
+  "JOBS",
+  "PROPERTY",
+  "VEHICLE",
+  "BUSINESSES",
+  "REQUESTS",
+  "EVENTS",
+  "COMMUNITY",
+  "DEALS",
+  "NEWS",
+] as const;
+
 function generateSlug(title: string): string {
   const slug = title
     .toLowerCase()
@@ -51,6 +65,14 @@ export async function createAd(formData: FormData) {
   const baseSlug = generateSlug(title);
   const slug = baseSlug ? await getUniqueSlug(baseSlug) : null;
 
+  if (
+    !allowedCategories.includes(
+      category as (typeof allowedCategories)[number],
+    )
+  ) {
+    throw new Error("Invalid ad category");
+  }
+
   const user = await ensureUserFromClerkId(clerkId);
   const startDate = new Date();
   const endDate = new Date(startDate);
@@ -95,16 +117,7 @@ export async function createAd(formData: FormData) {
       title,
       slug,
       description,
-      category: category as
-        | "BUSINESSES"
-        | "SERVICES"
-        | "REQUESTS"
-        | "JOBS"
-        | "COMMUNITY"
-        | "NEWS"
-        | "LOCALDEALS"
-        | "LOOKINGFOR"
-        | "FORSALE",
+      category: category as (typeof allowedCategories)[number],
       location: location
         ? {
             connect: [{ id: location.id }],
@@ -159,6 +172,14 @@ export async function updateAd(id: string, formData: FormData) {
   const locationName = locationInput?.trim();
   let location = null;
 
+  if (
+    !allowedCategories.includes(
+      category as (typeof allowedCategories)[number],
+    )
+  ) {
+    throw new Error("Invalid ad category");
+  }
+
   if (locationName) {
     location = await prisma.adLocation.upsert({
       where: { name: locationName },
@@ -194,16 +215,7 @@ export async function updateAd(id: string, formData: FormData) {
     data: {
       title,
       description,
-      category: category as
-        | "BUSINESSES"
-        | "SERVICES"
-        | "REQUESTS"
-        | "JOBS"
-        | "COMMUNITY"
-        | "NEWS"
-        | "LOCALDEALS"
-        | "LOOKINGFOR"
-        | "FORSALE",
+      category: category as (typeof allowedCategories)[number],
       imageUrl: imageUrl || null,
       url: linkUrl || null,
       contactName: contactName || null,

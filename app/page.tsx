@@ -23,15 +23,17 @@ const prisma = new PrismaClient({ adapter });
 
 const categories = [
   "ALL",
-  "BUSINESSES",
+  "MARKETPLACE",
   "SERVICES",
-  "REQUESTS",
   "JOBS",
+  "PROPERTY",
+  "VEHICLE",
+  "BUSINESSES",
+  "REQUESTS",
+  "EVENTS",
   "COMMUNITY",
+  "DEALS",
   "NEWS",
-  "LOCALDEALS",
-  "LOOKINGFOR",
-  "FORSALE",
 ];
 
 async function getUserLocationFromHeader() {

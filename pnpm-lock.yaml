@@ -26,6 +26,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      footer-year:
+        specifier: ^1.0.4
+        version: 1.0.4
       lucide-react:
         specifier: ^0.577.0
         version: 0.577.0(react@19.2.3)
@@ -2664,6 +2667,9 @@ packages:
 
   flatted@3.3.4:
     resolution: {integrity: sha512-3+mMldrTAPdta5kjX2G2J7iX4zxtnwpdA8Tr2ZSjkyPSanvbZAcy6flmtnXbEybHrDcU9641lxrMfFuUxVz9vA==}
+
+  footer-year@1.0.4:
+    resolution: {integrity: sha512-PsAKnOvy21QwwVX/35kSWeH539PCBgQv9OkTVW85FAJACvrhjSy6aqyJ2VbakHe/ECs2KOu0hjJ30BAuKC0Y4g==}
 
   for-each@0.3.5:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
@@ -7091,6 +7097,8 @@ snapshots:
       keyv: 4.5.4
 
   flatted@3.3.4: {}
+
+  footer-year@1.0.4: {}
 
   for-each@0.3.5:
     dependencies:
