@@ -90,7 +90,7 @@ function AdCardBody({
           {ad.category}
         </span>
       </div>
-      <h3 className="mb-2 line-clamp-2 font-mono text-sm font-bold text-zinc-100 group-hover:text-green-400">
+      <h3 className="mb-2 line-clamp-2 font-mono text-sm font-bold text-zinc-100 group-hover:text-green-400 hover:cursor-pointer">
         {ad.title}
       </h3>
       <p className="line-clamp-2 font-mono text-[11px] text-zinc-500">
