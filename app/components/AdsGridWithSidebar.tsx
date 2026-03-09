@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { type MouseEvent, useMemo, useState } from "react";
 
 type MarketAd = {
   id: string;
@@ -58,7 +59,15 @@ function getAdShareUrl(ad: MarketAd) {
   return `${window.location.origin}/ads/${ad.slug || ad.id}`;
 }
 
-function AdCardBody({ ad }: { ad: MarketAd }) {
+function AdCardBody({
+  ad,
+  activeTag,
+  onTagClick,
+}: {
+  ad: MarketAd;
+  activeTag: string | null;
+  onTagClick: (event: MouseEvent<HTMLButtonElement>, tag: string) => void;
+}) {
   return (
     <>
       {ad.imageUrl && (
@@ -90,12 +99,18 @@ function AdCardBody({ ad }: { ad: MarketAd }) {
       {ad.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1">
           {ad.tags.slice(0, 3).map((tag) => (
-            <span
+            <button
               key={tag.id}
-              className="rounded bg-zinc-700 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400"
+              type="button"
+              onClick={(event) => onTagClick(event, tag.name)}
+              className={`rounded px-1.5 py-0.5 font-mono text-[10px] ${
+                activeTag?.toLowerCase() === tag.name.toLowerCase()
+                  ? "bg-green-500/25 text-green-300 hover:cursor-pointer"
+                  : "bg-zinc-700 text-zinc-400 hover:bg-zinc-600 hover:cursor-pointer"
+              }`}
             >
               #{tag.name}
-            </span>
+            </button>
           ))}
         </div>
       )}
@@ -114,9 +129,18 @@ function AdCardBody({ ad }: { ad: MarketAd }) {
   );
 }
 
-export function AdsGridWithSidebar({ ads }: { ads: MarketAd[] }) {
+export function AdsGridWithSidebar({
+  ads,
+  activeTag = null,
+}: {
+  ads: MarketAd[];
+  activeTag?: string | null;
+}) {
   const [activeAdId, setActiveAdId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const activeAd = useMemo(
     () => ads.find((ad) => ad.id === activeAdId) || null,
@@ -158,6 +182,16 @@ export function AdsGridWithSidebar({ ads }: { ads: MarketAd[] }) {
     await handleCopyShareUrl();
   }
 
+  function handleTagClick(event: MouseEvent<HTMLButtonElement>, tag: string) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tag", tag);
+
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
   return (
     <>
       <div className="grid grid-flow-dense grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -177,7 +211,11 @@ export function AdsGridWithSidebar({ ads }: { ads: MarketAd[] }) {
                 onClick={() => trackAdView(ad.id)}
                 className={baseClass}
               >
-                <AdCardBody ad={ad} />
+                <AdCardBody
+                  ad={ad}
+                  activeTag={activeTag}
+                  onTagClick={handleTagClick}
+                />
               </a>
             );
           }
@@ -192,7 +230,11 @@ export function AdsGridWithSidebar({ ads }: { ads: MarketAd[] }) {
               }}
               className={baseClass}
             >
-              <AdCardBody ad={ad} />
+              <AdCardBody
+                ad={ad}
+                activeTag={activeTag}
+                onTagClick={handleTagClick}
+              />
             </button>
           );
         })}
@@ -243,12 +285,18 @@ export function AdsGridWithSidebar({ ads }: { ads: MarketAd[] }) {
             {activeAd.tags.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {activeAd.tags.map((tag) => (
-                  <span
+                  <button
                     key={tag.id}
-                    className="rounded bg-zinc-800 px-2 py-1 font-mono text-[11px] text-zinc-400"
+                    type="button"
+                    onClick={(event) => handleTagClick(event, tag.name)}
+                    className={`rounded px-2 py-1 font-mono text-[11px] ${
+                      activeTag?.toLowerCase() === tag.name.toLowerCase()
+                        ? "bg-green-500/25 text-green-300"
+                        : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+                    }`}
                   >
                     #{tag.name}
-                  </span>
+                  </button>
                 ))}
               </div>
             )}

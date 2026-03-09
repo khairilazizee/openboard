@@ -45,6 +45,7 @@ async function getUserLocationFromHeader() {
 async function getAds(
   search: string | null,
   category: string | null,
+  tag: string | null,
   userLocation: string | null,
 ) {
   const now = new Date();
@@ -62,6 +63,19 @@ async function getAds(
           tags: { some: { name: { contains: search, mode: "insensitive" } } },
         },
       ],
+    });
+  }
+
+  if (tag) {
+    andConditions.push({
+      tags: {
+        some: {
+          name: {
+            equals: tag,
+            mode: "insensitive",
+          },
+        },
+      },
     });
   }
 
@@ -114,13 +128,14 @@ function shuffleAds<T>(items: T[]): T[] {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; category?: string }>;
+  searchParams: Promise<{ search?: string; category?: string; tag?: string }>;
 }) {
   const params = await searchParams;
   const search = params.search || null;
   const category = params.category || null;
+  const tag = params.tag?.trim() || null;
   const userLocation = await getUserLocationFromHeader();
-  const ads = await getAds(search, category, userLocation);
+  const ads = await getAds(search, category, tag, userLocation);
   const randomizedAds = shuffleAds(ads);
   const serializedAds = randomizedAds.map((ad) => ({
     id: ad.id,
@@ -169,6 +184,7 @@ export default async function Home({
                 className="flex-1 rounded border border-zinc-700 bg-zinc-800 px-4 py-2 font-mono text-sm text-green-400 placeholder-zinc-600 focus:border-green-500 focus:outline-none"
               />
               <input type="hidden" name="category" value={category || ""} />
+              <input type="hidden" name="tag" value={tag || ""} />
               <button
                 type="submit"
                 className="rounded border border-green-500 bg-green-500/10 px-6 py-2 font-mono text-sm font-bold text-green-400 transition-colors hover:bg-green-500/20"
@@ -180,7 +196,7 @@ export default async function Home({
               {categories.map((cat) => (
                 <Link
                   key={cat}
-                  href={`/?category=${cat}${search ? `&search=${search}` : ""}`}
+                  href={`/?category=${cat}${search ? `&search=${search}` : ""}${tag ? `&tag=${encodeURIComponent(tag)}` : ""}`}
                   className={`rounded px-3 py-1 font-mono text-xs font-bold transition-colors ${
                     (category || "ALL") === cat
                       ? "bg-green-500 text-black"
@@ -191,9 +207,23 @@ export default async function Home({
                 </Link>
               ))}
             </div>
+            {tag && (
+              <div className="flex items-center gap-2 font-mono text-xs">
+                <span className="text-zinc-500">Tag filter:</span>
+                <span className="rounded bg-green-500/20 px-2 py-1 text-green-400">
+                  #{tag}
+                </span>
+                <Link
+                  href={`/?category=${category || "ALL"}${search ? `&search=${search}` : ""}`}
+                  className="rounded border border-zinc-700 px-2 py-1 text-zinc-400 hover:border-green-500 hover:text-green-400"
+                >
+                  Clear tag
+                </Link>
+              </div>
+            )}
           </div>
 
-          <AdsGridWithSidebar ads={serializedAds} />
+          <AdsGridWithSidebar ads={serializedAds} activeTag={tag} />
 
           {ads.length === 0 && (
             <div className="flex flex-col items-center justify-center rounded border border-zinc-800 bg-zinc-800/30 py-16">
