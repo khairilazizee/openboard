@@ -26,7 +26,7 @@ function getCardStyle(priority: number) {
   if (priority === 1) return "row-span-1 col-span-2";
   return "row-span-1";
 }
-
+// function toExternalUrl(url: string)
 function toExternalUrl(url: string) {
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   return `https://${url}`;
