@@ -66,9 +66,7 @@ export async function createAd(formData: FormData) {
   const slug = baseSlug ? await getUniqueSlug(baseSlug) : null;
 
   if (
-    !allowedCategories.includes(
-      category as (typeof allowedCategories)[number],
-    )
+    !allowedCategories.includes(category as (typeof allowedCategories)[number])
   ) {
     throw new Error("Invalid ad category");
   }
@@ -173,9 +171,7 @@ export async function updateAd(id: string, formData: FormData) {
   let location = null;
 
   if (
-    !allowedCategories.includes(
-      category as (typeof allowedCategories)[number],
-    )
+    !allowedCategories.includes(category as (typeof allowedCategories)[number])
   ) {
     throw new Error("Invalid ad category");
   }
@@ -280,13 +276,11 @@ export async function updateAdAdminSettings(id: string, formData: FormData) {
   const statusInput = String(formData.get("status") || "").toUpperCase();
   const startDateInput = (formData.get("startDate") as string) || "";
   const endDateInput = (formData.get("endDate") as string) || "";
-  const allowedStatuses = [
-    "ACTIVE",
-    "INACTIVE",
-    "PRIVATE",
-  ] as const;
+  const allowedStatuses = ["ACTIVE", "INACTIVE", "PRIVATE"] as const;
 
-  if (!allowedStatuses.includes(statusInput as (typeof allowedStatuses)[number])) {
+  if (
+    !allowedStatuses.includes(statusInput as (typeof allowedStatuses)[number])
+  ) {
     throw new Error("Invalid ad status");
   }
 
@@ -317,10 +311,7 @@ export async function updateAdAdminSettings(id: string, formData: FormData) {
     data: {
       hotness,
       priority,
-      status: statusInput as
-        | "ACTIVE"
-        | "INACTIVE"
-        | "PRIVATE",
+      status: statusInput as "ACTIVE" | "INACTIVE" | "PRIVATE",
       startDate,
       endDate,
     },
@@ -362,7 +353,9 @@ export async function updateAdByAdmin(id: string, formData: FormData) {
   }
 
   const allowedStatuses = ["ACTIVE", "INACTIVE", "PRIVATE"] as const;
-  if (!allowedStatuses.includes(statusInput as (typeof allowedStatuses)[number])) {
+  if (
+    !allowedStatuses.includes(statusInput as (typeof allowedStatuses)[number])
+  ) {
     throw new Error("Invalid ad status");
   }
 
@@ -421,8 +414,8 @@ export async function deleteAdByAdmin(id: string) {
 
   revalidatePath("/");
   revalidatePath("/(admin)/admin/dashboard");
-  revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/dashboard/ads");
   revalidatePath("/(admin)/admin/dashboard/ads");
   revalidatePath("/admin/dashboard/ads");
-  redirect("/admin/dashboard");
+  redirect("/admin/dashboard/ads");
 }
