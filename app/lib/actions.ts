@@ -332,3 +332,97 @@ export async function updateAdAdminSettings(id: string, formData: FormData) {
   revalidatePath("/(admin)/admin/dashboard/ads");
   revalidatePath("/admin/dashboard/ads");
 }
+
+export async function updateAdByAdmin(id: string, formData: FormData) {
+  const { userId: clerkId } = await auth();
+
+  if (!clerkId) {
+    throw new Error("Unauthorized");
+  }
+
+  const user = await ensureUserFromClerkId(clerkId);
+  const isAllowedAdmin =
+    user.isAdmin && user.email.toLowerCase() === "khairil114@gmail.com";
+
+  if (!isAllowedAdmin) {
+    throw new Error("Not authorized");
+  }
+
+  const categoryInput = String(formData.get("category") || "");
+  const statusInput = String(formData.get("status") || "").toUpperCase();
+  const startDateInput = (formData.get("startDate") as string) || "";
+  const endDateInput = (formData.get("endDate") as string) || "";
+
+  if (
+    !allowedCategories.includes(
+      categoryInput as (typeof allowedCategories)[number],
+    )
+  ) {
+    throw new Error("Invalid ad category");
+  }
+
+  const allowedStatuses = ["ACTIVE", "INACTIVE", "PRIVATE"] as const;
+  if (!allowedStatuses.includes(statusInput as (typeof allowedStatuses)[number])) {
+    throw new Error("Invalid ad status");
+  }
+
+  const startDate = startDateInput ? new Date(startDateInput) : null;
+  const endDate = endDateInput ? new Date(endDateInput) : null;
+
+  if (startDate && Number.isNaN(startDate.getTime())) {
+    throw new Error("Invalid start date");
+  }
+
+  if (endDate && Number.isNaN(endDate.getTime())) {
+    throw new Error("Invalid end date");
+  }
+
+  if (startDate && endDate && startDate > endDate) {
+    throw new Error("Start date cannot be later than end date");
+  }
+
+  await prisma.ads.update({
+    where: { id },
+    data: {
+      category: categoryInput as (typeof allowedCategories)[number],
+      status: statusInput as "ACTIVE" | "INACTIVE" | "PRIVATE",
+      startDate,
+      endDate,
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/(admin)/admin/dashboard");
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/(admin)/admin/dashboard/ads");
+  revalidatePath("/admin/dashboard/ads");
+  revalidatePath(`/admin/dashboard/ads/edit/${id}`);
+  revalidatePath(`/admin/dashboard/ads/edit/${id}/page`);
+}
+
+export async function deleteAdByAdmin(id: string) {
+  const { userId: clerkId } = await auth();
+
+  if (!clerkId) {
+    throw new Error("Unauthorized");
+  }
+
+  const user = await ensureUserFromClerkId(clerkId);
+  const isAllowedAdmin =
+    user.isAdmin && user.email.toLowerCase() === "khairil114@gmail.com";
+
+  if (!isAllowedAdmin) {
+    throw new Error("Not authorized");
+  }
+
+  await prisma.ads.delete({
+    where: { id },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/(admin)/admin/dashboard");
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/(admin)/admin/dashboard/ads");
+  revalidatePath("/admin/dashboard/ads");
+  redirect("/admin/dashboard");
+}

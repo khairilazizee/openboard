@@ -99,18 +99,20 @@ function AdCardBody({
       {ad.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1">
           {ad.tags.slice(0, 3).map((tag) => (
-            <button
-              key={tag.id}
-              type="button"
-              onClick={(event) => onTagClick(event, tag.name)}
-              className={`rounded px-1.5 py-0.5 font-mono text-[10px] ${
-                activeTag?.toLowerCase() === tag.name.toLowerCase()
-                  ? "bg-green-500/25 text-green-300 hover:cursor-pointer"
-                  : "bg-zinc-700 text-zinc-400 hover:bg-zinc-600 hover:cursor-pointer"
-              }`}
-            >
-              #{tag.name}
-            </button>
+            <span key={tag.id}>
+              <button
+                key={tag.id}
+                type="button"
+                onClick={(event) => onTagClick(event, tag.name)}
+                className={`rounded px-1.5 py-0.5 font-mono text-[10px] ${
+                  activeTag?.toLowerCase() === tag.name.toLowerCase()
+                    ? "bg-green-500/25 text-green-300 hover:cursor-pointer"
+                    : "bg-zinc-700 text-zinc-400 hover:bg-zinc-600 hover:cursor-pointer"
+                }`}
+              >
+                #{tag.name}
+              </button>
+            </span>
           ))}
         </div>
       )}
@@ -221,21 +223,20 @@ export function AdsGridWithSidebar({
           }
 
           return (
-            <button
+            <div
               key={ad.id}
-              type="button"
               onClick={() => {
                 trackAdView(ad.id);
                 setActiveAdId(ad.id);
               }}
-              className={baseClass}
+              className={`${baseClass} cursor-pointer`}
             >
               <AdCardBody
                 ad={ad}
                 activeTag={activeTag}
                 onTagClick={handleTagClick}
               />
-            </button>
+            </div>
           );
         })}
       </div>

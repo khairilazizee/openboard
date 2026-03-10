@@ -21,28 +21,43 @@ export async function ensureUserFromClerkId(clerkId: string) {
     where: { clerkId },
   });
 
-  if (!existing) {
-    return prisma.user.create({
+  if (existing) {
+    const nextEmail = email || existing.email;
+
+    if (existing.isAdmin !== admin || existing.email !== nextEmail) {
+      return prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          email: nextEmail,
+          isAdmin: admin,
+        },
+      });
+    }
+
+    return existing;
+  }
+
+  const existingByEmail = await prisma.user.findUnique({
+    where: { email: email || `${clerkId}@placeholder.com` },
+  });
+
+  if (existingByEmail) {
+    return prisma.user.update({
+      where: { id: existingByEmail.id },
       data: {
         clerkId,
-        email: email || `${clerkId}@placeholder.com`,
         name,
         isAdmin: admin,
       },
     });
   }
 
-  const nextEmail = email || existing.email;
-
-  if (existing.isAdmin !== admin || existing.email !== nextEmail) {
-    return prisma.user.update({
-      where: { id: existing.id },
-      data: {
-        email: nextEmail,
-        isAdmin: admin,
-      },
-    });
-  }
-
-  return existing;
+  return prisma.user.create({
+    data: {
+      clerkId,
+      email: email || `${clerkId}@placeholder.com`,
+      name,
+      isAdmin: admin,
+    },
+  });
 }

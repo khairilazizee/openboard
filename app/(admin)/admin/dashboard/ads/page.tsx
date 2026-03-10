@@ -3,16 +3,14 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "../../../../lib/prisma";
 import { ensureUserFromClerkId } from "../../../../lib/user";
-import { updateAdAdminSettings } from "../../../../lib/actions";
 
-function toDateTimeLocalValue(date: Date | null): string {
-  if (!date) return "";
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
-}
+const ITEMS_PER_PAGE = 30;
 
-export default async function AdminAdsPage() {
+export default async function AdminAdsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
@@ -27,11 +25,21 @@ export default async function AdminAdsPage() {
     redirect("/");
   }
 
-  const ads = await prisma.ads.findMany({
-    include: { user: true },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+  const params = await searchParams;
+  const currentPage = Number(params.page) || 1;
+  const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const [totalAds, ads] = await Promise.all([
+    prisma.ads.count(),
+    prisma.ads.findMany({
+      include: { user: true },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: ITEMS_PER_PAGE,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(totalAds / ITEMS_PER_PAGE);
 
   return (
     <div className="flex min-h-screen flex-col font-sans">
@@ -50,16 +58,15 @@ export default async function AdminAdsPage() {
           </div>
 
           <div className="rounded-lg border border-solid border-black/[.08] bg-white p-4 dark:border-white/[.145] dark:bg-[#1a1a1a]">
-            <h2 className="mb-4 text-xl font-semibold text-black dark:text-zinc-50">
-              Ads Schedule & Ranking
-            </h2>
-
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1100px]">
+              <table className="w-full min-w-[900px]">
                 <thead>
                   <tr className="border-b border-black/[.08] text-left dark:border-white/[.145]">
                     <th className="px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
                       Title
+                    </th>
+                    <th className="px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                      Category
                     </th>
                     <th className="px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
                       Owner
@@ -68,16 +75,7 @@ export default async function AdminAdsPage() {
                       Status
                     </th>
                     <th className="px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                      Hotness (0-100)
-                    </th>
-                    <th className="px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                      Priority (0-3)
-                    </th>
-                    <th className="px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                      Start Date
-                    </th>
-                    <th className="px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                      End Date
+                      Created
                     </th>
                     <th className="px-3 py-2 text-right text-xs font-medium text-zinc-600 dark:text-zinc-400">
                       Action
@@ -91,8 +89,13 @@ export default async function AdminAdsPage() {
                       className="border-b border-black/[.08] align-top dark:border-white/[.145]"
                     >
                       <td className="px-3 py-3">
-                        <p className="max-w-[220px] truncate text-sm font-medium text-black dark:text-zinc-50">
+                        <p className="max-w-[200px] truncate text-sm font-medium text-black dark:text-zinc-50">
                           {ad.title}
+                        </p>
+                      </td>
+                      <td className="px-3 py-3">
+                        <p className="text-sm text-zinc-600 dark:text-zinc-300">
+                          {ad.category}
                         </p>
                       </td>
                       <td className="px-3 py-3">
@@ -100,63 +103,61 @@ export default async function AdminAdsPage() {
                           {ad.user.email}
                         </p>
                       </td>
-                      <td className="px-3 py-3" colSpan={6}>
-                        <form
-                          action={updateAdAdminSettings.bind(null, ad.id)}
-                          className="grid grid-cols-1 gap-2 sm:grid-cols-[150px_120px_120px_220px_220px_1fr]"
+                      <td className="px-3 py-3">
+                        <span
+                          className={`inline-block rounded px-2 py-1 text-xs font-medium ${
+                            ad.status === "ACTIVE"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                              : ad.status === "INACTIVE"
+                                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                          }`}
                         >
-                          <select
-                            name="status"
-                            defaultValue={ad.status}
-                            className="rounded border border-solid border-black/[.08] bg-white px-3 py-2 text-sm text-black dark:border-white/[.145] dark:bg-[#2a2a2a] dark:text-zinc-50"
-                          >
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="INACTIVE">INACTIVE</option>
-                            <option value="PRIVATE">PRIVATE</option>
-                          </select>
-                          <input
-                            name="hotness"
-                            type="number"
-                            min={0}
-                            max={100}
-                            defaultValue={ad.hotness}
-                            className="rounded border border-solid border-black/[.08] bg-white px-3 py-2 text-sm text-black dark:border-white/[.145] dark:bg-[#2a2a2a] dark:text-zinc-50"
-                          />
-                          <input
-                            name="priority"
-                            type="number"
-                            min={0}
-                            max={3}
-                            defaultValue={ad.priority}
-                            className="rounded border border-solid border-black/[.08] bg-white px-3 py-2 text-sm text-black dark:border-white/[.145] dark:bg-[#2a2a2a] dark:text-zinc-50"
-                          />
-                          <input
-                            name="startDate"
-                            type="datetime-local"
-                            defaultValue={toDateTimeLocalValue(ad.startDate)}
-                            className="rounded border border-solid border-black/[.08] bg-white px-3 py-2 text-sm text-black dark:border-white/[.145] dark:bg-[#2a2a2a] dark:text-zinc-50"
-                          />
-                          <input
-                            name="endDate"
-                            type="datetime-local"
-                            defaultValue={toDateTimeLocalValue(ad.endDate)}
-                            className="rounded border border-solid border-black/[.08] bg-white px-3 py-2 text-sm text-black dark:border-white/[.145] dark:bg-[#2a2a2a] dark:text-zinc-50"
-                          />
-                          <div className="flex justify-end">
-                            <button
-                              type="submit"
-                              className="rounded bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-black dark:hover:bg-zinc-300"
-                            >
-                              Save
-                            </button>
-                          </div>
-                        </form>
+                          {ad.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3">
+                        <p className="text-sm text-zinc-600 dark:text-zinc-300">
+                          {new Date(ad.createdAt).toLocaleDateString()}
+                        </p>
+                      </td>
+                      <td className="px-3 py-3 text-right">
+                        <Link
+                          href={`/admin/dashboard/ads/edit/${ad.id}`}
+                          className="inline-block rounded bg-black px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-black dark:hover:bg-zinc-300"
+                        >
+                          Edit
+                        </Link>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {totalPages > 1 && (
+              <div className="mt-4 flex items-center justify-center gap-2">
+                {currentPage > 1 && (
+                  <Link
+                    href={`/admin/dashboard/ads?page=${currentPage - 1}`}
+                    className="rounded border border-black/[.08] px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-black/[.04] dark:border-white/[.145] dark:text-zinc-200 dark:hover:bg-[#1a1a1a]"
+                  >
+                    Previous
+                  </Link>
+                )}
+                <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Page {currentPage} of {totalPages}
+                </span>
+                {currentPage < totalPages && (
+                  <Link
+                    href={`/admin/dashboard/ads?page=${currentPage + 1}`}
+                    className="rounded border border-black/[.08] px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-black/[.04] dark:border-white/[.145] dark:text-zinc-200 dark:hover:bg-[#1a1a1a]"
+                  >
+                    Next
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>
