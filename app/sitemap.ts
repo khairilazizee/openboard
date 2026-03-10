@@ -19,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     orderBy: {
       updatedAt: "desc",
     },
+    take: 10000,
   });
 
   const adEntries: MetadataRoute.Sitemap = ads.map((ad) => ({
