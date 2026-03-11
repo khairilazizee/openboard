@@ -198,29 +198,9 @@ export function AdsGridWithSidebar({
     <>
       <div className="grid grid-flow-dense grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {ads.map((ad) => {
-          const hasExternalUrl = Boolean(ad.url && ad.url.trim().length > 0);
           const baseClass = `group relative overflow-hidden rounded border border-zinc-800 bg-zinc-800/50 p-4 text-left transition-all hover:border-green-500/50 ${getCardStyle(
             ad.priority || 0,
           )}`;
-
-          if (hasExternalUrl) {
-            return (
-              <a
-                key={ad.id}
-                href={toExternalUrl(ad.url || "")}
-                target="_blank"
-                rel="noreferrer noopener"
-                onClick={() => trackAdView(ad.id)}
-                className={baseClass}
-              >
-                <AdCardBody
-                  ad={ad}
-                  activeTag={activeTag}
-                  onTagClick={handleTagClick}
-                />
-              </a>
-            );
-          }
 
           return (
             <div
@@ -299,6 +279,23 @@ export function AdsGridWithSidebar({
                     #{tag.name}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {activeAd.url && (
+              <div className="mt-4 border-t border-zinc-800/60 pt-4">
+                <p className="font-mono text-[11px] text-zinc-500">
+                  For more information, visit:
+                </p>
+                <a
+                  href={toExternalUrl(activeAd.url)}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  onClick={(event) => event.stopPropagation()}
+                  className="mt-1 block font-mono text-sm font-semibold text-green-400 hover:text-green-200"
+                >
+                  {activeAd.url}
+                </a>
               </div>
             )}
 
