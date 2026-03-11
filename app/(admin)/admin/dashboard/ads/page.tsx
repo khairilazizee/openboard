@@ -129,7 +129,7 @@ export default async function AdminAdsPage({
                         >
                           Edit
                         </Link>
-                        <div>
+                        <div id="delete-ad-form">
                           <DeleteAdForm adId={ad.id} />
                         </div>
                       </td>
