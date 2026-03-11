@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "../../../../lib/prisma";
 import { ensureUserFromClerkId } from "../../../../lib/user";
+import { DeleteAdForm } from "./edit/[id]/DeleteAdForm";
 
 const ITEMS_PER_PAGE = 30;
 
@@ -121,13 +122,16 @@ export default async function AdminAdsPage({
                           {new Date(ad.createdAt).toLocaleDateString()}
                         </p>
                       </td>
-                      <td className="px-3 py-3 text-right">
+                      <td className="px-3 py-3 text-right flex flex-row gap-2 justify-end">
                         <Link
                           href={`/admin/dashboard/ads/edit/${ad.id}`}
-                          className="inline-block rounded bg-black px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-black dark:hover:bg-zinc-300"
+                          className="inline-block rounded bg-black px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-black dark:hover:bg-zinc-300"
                         >
                           Edit
                         </Link>
+                        <div>
+                          <DeleteAdForm adId={ad.id} />
+                        </div>
                       </td>
                     </tr>
                   ))}
