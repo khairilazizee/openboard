@@ -104,6 +104,11 @@ export default async function AdDetailsPage({
   if (!ad) {
     notFound();
   }
+
+  function toExternalUrl(url: string) {
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    return `https://${url}`;
+  }
   const baseUrl = getBaseUrl();
   const sharePath = `/ads/${ad.slug || ad.id}`;
   const shareUrl = `${baseUrl}${sharePath}`;
@@ -169,6 +174,23 @@ export default async function AdDetailsPage({
                       #{tag.name}
                     </span>
                   ))}
+                </div>
+              )}
+
+              {ad.url && (
+                <div className="mt-4 border-t border-zinc-800/60 pt-4">
+                  <p className="font-mono text-[11px] text-zinc-500">
+                    For more information, visit:
+                  </p>
+                  <a
+                    href={toExternalUrl(ad.url)}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    onClick={(event) => event.stopPropagation()}
+                    className="mt-1 block font-mono text-sm font-semibold text-green-400 hover:text-green-200"
+                  >
+                    {ad.url}
+                  </a>
                 </div>
               )}
 
