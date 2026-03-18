@@ -46,6 +46,37 @@ async function getUniqueSlug(baseSlug: string): Promise<string> {
   }
 }
 
+function cleanCommaSeparatedInput(input: string | null) {
+  if (!input) {
+    return [] as string[];
+  }
+
+  const seen = new Set<string>();
+  const values: string[] = [];
+
+  for (const raw of input.split(",")) {
+    const trimmed = raw.trim();
+    if (trimmed && !seen.has(trimmed)) {
+      seen.add(trimmed);
+      values.push(trimmed);
+    }
+  }
+
+  return values;
+}
+
+async function upsertLocations(names: string[]) {
+  return Promise.all(
+    names.map(async (name) =>
+      prisma.adLocation.upsert({
+        where: { name },
+        update: {},
+        create: { name },
+      }),
+    ),
+  );
+}
+
 export async function createAd(formData: FormData) {
   const { userId: clerkId } = await auth();
 
@@ -58,7 +89,7 @@ export async function createAd(formData: FormData) {
   const category = formData.get("category") as string;
   const imageUrl = formData.get("imageUrl") as string;
   const linkUrl = formData.get("linkUrl") as string;
-  const locationInput = formData.get("location") as string;
+  const locationInput = formData.get("location") as string | null;
   const contactName = formData.get("contactName") as string;
   const contactNumber = formData.get("contactNumber") as string;
   const tagsInput = formData.get("tags") as string;
@@ -75,16 +106,8 @@ export async function createAd(formData: FormData) {
   const startDate = new Date();
   const endDate = new Date(startDate);
   endDate.setMonth(endDate.getMonth() + 1);
-  const locationName = locationInput?.trim();
-  let location = null;
-
-  if (locationName) {
-    location = await prisma.adLocation.upsert({
-      where: { name: locationName },
-      update: {},
-      create: { name: locationName },
-    });
-  }
+  const locationNames = cleanCommaSeparatedInput(locationInput);
+  const locations = await upsertLocations(locationNames);
 
   // Process tags
   const tagNames = tagsInput
@@ -116,9 +139,9 @@ export async function createAd(formData: FormData) {
       slug,
       description,
       category: category as (typeof allowedCategories)[number],
-      location: location
+      location: locations.length
         ? {
-            connect: [{ id: location.id }],
+            connect: locations.map((loc) => ({ id: loc.id })),
           }
         : undefined,
       imageUrl: imageUrl || null,
@@ -163,25 +186,17 @@ export async function updateAd(id: string, formData: FormData) {
   const category = formData.get("category") as string;
   const imageUrl = formData.get("imageUrl") as string;
   const linkUrl = formData.get("linkUrl") as string;
-  const locationInput = formData.get("location") as string;
+  const locationInput = formData.get("location") as string | null;
   const contactName = formData.get("contactName") as string;
   const contactNumber = formData.get("contactNumber") as string;
   const tagsInput = formData.get("tags") as string;
-  const locationName = locationInput?.trim();
-  let location = null;
+  const locationNames = cleanCommaSeparatedInput(locationInput);
+  const locations = await upsertLocations(locationNames);
 
   if (
     !allowedCategories.includes(category as (typeof allowedCategories)[number])
   ) {
     throw new Error("Invalid ad category");
-  }
-
-  if (locationName) {
-    location = await prisma.adLocation.upsert({
-      where: { name: locationName },
-      update: {},
-      create: { name: locationName },
-    });
   }
 
   // Process tags
@@ -218,7 +233,9 @@ export async function updateAd(id: string, formData: FormData) {
       contactNumber: contactNumber || null,
       location: {
         set: [],
-        ...(location ? { connect: [{ id: location.id }] } : {}),
+        ...(locations.length
+          ? { connect: locations.map((loc) => ({ id: loc.id })) }
+          : {}),
       },
       tags: {
         set: [],

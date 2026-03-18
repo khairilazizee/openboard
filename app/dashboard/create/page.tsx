@@ -161,13 +161,13 @@ export default async function CreateAdPage() {
                   htmlFor="location"
                   className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
                 >
-                  Location targeted
+                  Locations targeted (comma separated)
                 </label>
                 <input
                   id="location"
                   name="location"
                   type="text"
-                  placeholder="petaling jaya"
+                  placeholder="petaling jaya, klang"
                   className="w-full rounded-md border border-solid border-black/[.08] bg-white px-4 py-2 text-black dark:border-white/[.145] dark:bg-[#2a2a2a] dark:text-zinc-50"
                 />
               </div>
