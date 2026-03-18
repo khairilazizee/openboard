@@ -12,11 +12,15 @@ const prisma = new PrismaClient({ adapter });
 // ---------------- HELPERS ----------------
 
 function generateSlug(title: string): string {
-  return title
+  const base = title
     .toLowerCase()
     .replace(/[()]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+
+  const random = Math.random().toString(36).substring(2, 6);
+
+  return `${base}-${random}`;
 }
 
 function randomDate() {
