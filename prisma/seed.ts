@@ -3,6 +3,8 @@ import { PrismaClient } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+const shouldSeed = process.env.PRISMA_SEED === "true";
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
@@ -114,6 +116,11 @@ function generateAd() {
 // ---------------- MAIN ----------------
 
 async function main() {
+  if (!shouldSeed) {
+    console.log("Skipping seed: set PRISMA_SEED=true to run it.");
+    return;
+  }
+
   console.log("Seeding...");
 
   // Clear data

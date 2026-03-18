@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type MouseEvent, useMemo, useState } from "react";
+import { Show } from "@clerk/nextjs";
 
 type MarketAd = {
   id: string;
@@ -314,9 +315,16 @@ export function AdsGridWithSidebar({
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-zinc-500">Phone</span>
-                <span className="text-zinc-300">
-                  {activeAd.contactNumber || "Not provided"}
-                </span>
+                <Show
+                  when="signed-in"
+                  fallback={
+                    <span className="text-zinc-500">Login to view</span>
+                  }
+                >
+                  <span className="text-zinc-300">
+                    {activeAd.contactNumber || "Not provided"}
+                  </span>
+                </Show>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-zinc-500">Created</span>
