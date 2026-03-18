@@ -1,17 +1,10 @@
 "use client";
 
-import { FormEvent, useEffect, useState, useTransition } from "react";
+import { FormEvent, useState } from "react";
 import { deleteAdByAdmin } from "../../../../../../lib/actions";
 
 export function DeleteAdForm({ adId }: { adId: string }) {
-  const [isPending] = useTransition();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!isPending && isSubmitting) {
-      setIsSubmitting(false);
-    }
-  }, [isPending, isSubmitting]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     if (!confirm("Are you sure you want to delete this ad?")) {
@@ -22,7 +15,7 @@ export function DeleteAdForm({ adId }: { adId: string }) {
     setIsSubmitting(true);
   };
 
-  const isDisabled = isSubmitting || isPending;
+  const isDisabled = isSubmitting;
 
   return (
     <form action={deleteAdByAdmin.bind(null, adId)} onSubmit={handleSubmit}>
